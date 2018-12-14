@@ -36,6 +36,6 @@ Then add them to the configuration and update your resource-pack (/es reload).
 
 ### [Can I get a YouTube tutorial?](https://youtu.be/Cl-5OnnBGwU)
 
-### [Configuration]()
+### [Configuration](https://github.com/DosMike/EventSounds/blob/master/configuration.md)
 
-### [I'm plugin developer]()
+### [I'm plugin developer](https://github.com/DosMike/EventSounds/blob/master/developer.md)
