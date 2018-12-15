@@ -16,7 +16,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
 
 public class EventSoundRegistry {
@@ -119,13 +118,16 @@ public class EventSoundRegistry {
         }
     }
 
+    /**
+     * @return The join sound if soundTarget for the joinsound is not NONE since downloading the resource-pack may
+     *          take a varying amount of time and we wait for successful download.
+     */
     public static void triggerJoin(Player player) {
         SoundOptions options = event_options.get(EVENT_JOIN);
         Map<BiFitness<Integer, Player, Object>, Playable> sounds = event_sounds.get(EVENT_JOIN);
         Refrigerator fridge = event_cooldowns.get(EVENT_JOIN);
 
         if (!fridge.test(player)) return;
-        Map<Playable, Integer> fitness = new HashMap<>();
         Optional<Playable> sound = sounds.entrySet().stream()
                 .map(e -> Entry.of(e.getValue(), e.getKey().test(player,null)))
                 .filter(e->e.getValue()>=0) //filter out failed tests
@@ -146,8 +148,12 @@ public class EventSoundRegistry {
                 return;
         }
 
+        EventSounds.l("Delay: %d", options.getDelayMs());
         if (options.getDelayMs() > 0) {
-            EventSounds.getExecutor().schedule(()->sound.get().play(player, null), options.getDelayMs(), TimeUnit.MILLISECONDS);
+            EventSounds.getExecutor().schedule(()->{
+                EventSounds.l("Play %s to %s", sound.get().getSound().getRegistryName(), player.getName());
+                sound.get().play(player, null);
+            }, options.getDelayMs(), TimeUnit.MILLISECONDS);
         } else {
             sound.get().play(player, null);
         }

@@ -8,6 +8,9 @@ import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.resourcepack.ResourcePacks;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -32,7 +35,7 @@ public class ResourcePacker {
     public static Path getPackDir() {
         return soundsCustom;
     }
-    private String ftpU, ftpP;
+    private String ftpU, ftpP, sha1=null;
 
     private File zipSrc, zipDst = new File(".", "eventsounds_pack.zip");;
     private URL ftpTarget;
@@ -99,15 +102,6 @@ public class ResourcePacker {
             }
             zout.closeEntry();
         }
-
-        //create directory entries
-//        try { zout.putNextEntry(new ZipEntry("assets/")); } catch (ZipException ignore) {/* duplicate entry */}
-//        try { zout.putNextEntry(new ZipEntry("assets/minecraft/")); } catch (ZipException ignore) {/* duplicate entry */}
-//        try { zout.putNextEntry(new ZipEntry("assets/minecraft/sounds/")); } catch (ZipException ignore) {/* duplicate entry */}
-//        try { zout.putNextEntry(new ZipEntry("assets/minecraft/sounds/custom/")); } catch (ZipException ignore) {/* duplicate entry */}
-//        try { zout.putNextEntry(new ZipEntry("assets/minecraft/sounds/custom/es/")); } catch (ZipException ignore) {/* duplicate entry */}
-//        for (SoundDefinitionRegistry.ESEvents event : SoundDefinitionRegistry.ESEvents.values())
-//            try { zout.putNextEntry(new ZipEntry("assets/minecraft/sounds/custom/es/"+event.name().toLowerCase()+"/")); } catch (ZipException ignore) {/* duplicate entry */}
 
         //replace('\', '/'), because minecraft does not seem to use Paths, but split('/')
         ZipEntry entry = new ZipEntry(soundsJson.toString().replace('\\','/'));
@@ -181,7 +175,7 @@ public class ResourcePacker {
         int r;
 
         //calculate sha1
-        String sha1;
+        sha1=null;
         {
             FileInputStream fis = new FileInputStream(zipDst);
             MessageDigest digest = MessageDigest.getInstance("SHA1");
@@ -202,9 +196,9 @@ public class ResourcePacker {
             try {
                 br = new BufferedReader(new InputStreamReader(new FileInputStream(propertiesFile)));
                 String line;
-                while ((line=br.readLine())!=null) {
+                while ((line = br.readLine()) != null) {
                     if (line.startsWith("resource-pack-sha1=")) {
-                        props.append("resource-pack-sha1="+sha1);
+                        props.append("resource-pack-sha1=" + sha1);
                     } else {
                         props.append(line);
                     }
@@ -213,7 +207,9 @@ public class ResourcePacker {
             } catch (IOException error) {
                 error.printStackTrace();
             } finally {
-                try { br.close(); } catch (Exception ignore) {/**/}
+                try {
+                    br.close();
+                } catch (Exception ignore) {/**/}
             }
             BufferedWriter bw = null;
             try {
@@ -223,7 +219,9 @@ public class ResourcePacker {
             } catch (IOException error) {
                 error.printStackTrace();
             } finally {
-                try { bw.close(); } catch (Exception ignore) {/**/}
+                try {
+                    bw.close();
+                } catch (Exception ignore) {/**/}
             }
         }
 
@@ -287,6 +285,20 @@ public class ResourcePacker {
             try { client.disconnect(); } catch (Exception e) {/**/}
             try { zipIn.close(); } catch (Exception e) {/**/}
             try { out.close(); } catch (Exception e) {/**/}
+        }
+    }
+
+    public boolean validateResourcePack() {
+        if (sha1 == null) return false;
+        try {
+            //use to extract uri
+            ResourcePack pack = Sponge.getServer().getDefaultResourcePack().orElse(null);
+            if (pack==null)return false;
+            //get updated hash
+            pack = ResourcePacks.fromUri(pack.getUri());
+            return sha1.equalsIgnoreCase(pack.getHash().orElse(null));
+        } catch (FileNotFoundException e) {
+            return false;
         }
     }
 

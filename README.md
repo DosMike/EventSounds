@@ -32,8 +32,6 @@ Permission: `minecraft.command.stopsound.sound`
 Put them inside a assets/eventsounds/ folder on your server (you have to create that folder).
 Then add them to the configuration and update your resource-pack (/es reload).
 
-**Note:** Changing the resource-pack requires the minecraft-server to restart! This is a limitation of minecraft servers themself, not of the plugin or Sponge!
-
 ### [Can I get a YouTube tutorial?](https://youtu.be/Cl-5OnnBGwU)
 
 ### [Configuration](https://github.com/DosMike/EventSounds/blob/master/configuration.md)

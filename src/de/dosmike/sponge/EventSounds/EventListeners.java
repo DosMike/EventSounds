@@ -1,15 +1,21 @@
 package de.dosmike.sponge.EventSounds;
 
 import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 
@@ -17,7 +23,17 @@ public class EventListeners {
 
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event) {
+        if (EventSounds.doForceDownload())
+            Sponge.getServer().getDefaultResourcePack().ifPresent(pack->
+                    event.getTargetEntity().sendResourcePack(pack)
+            );
         EventSoundRegistry.triggerJoin(event.getTargetEntity());
+    }
+    @Listener
+    public void onResourcePackLoaded(ResourcePackStatusEvent event) {
+        if (event.getStatus().equals(ResourcePackStatusEvent.ResourcePackStatus.FAILED)) {
+            event.getPlayer().sendMessage(Text.of(TextColors.RED, "Oops", TextColors.WHITE, ", looks like downloading the resource-pack failed. You can ", Text.builder("try again").onClick(TextActions.runCommand("/eventsounds")).style(TextStyles.UNDERLINE).color(TextColors.BLUE).build()));
+        }
     }
     @Listener
     public void onChat(MessageChannelEvent.Chat event) {

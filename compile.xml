@@ -50,7 +50,15 @@
     </target>
     <target name="release_build" depends="create_jar">
         <exec dir="${dir.gpg}" executable="cmd">
-            <arg line="/c start cmd /c gpg2 --output ${dir.buildfile}/${my.project.name}-${my.project.version}.jar.sig --detach-sig ${dir.server}/mods/${my.project.name}-${my.project.version}.jar"/>
+            <arg value="/c"/>
+            <arg value="start"/>
+            <arg value="cmd"/>
+            <arg value="/c"/>
+            <arg value="gpg2"/>
+            <arg value="--output"/>
+            <arg path="${dir.buildfile}/${my.project.name}-${my.project.version}.jar.sig"/>
+            <arg value="--detach-sig"/>
+            <arg path="${dir.server}/mods/${my.project.name}-${my.project.version}.jar"/>
         </exec>
     </target>
 </project>

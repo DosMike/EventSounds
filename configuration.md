@@ -26,7 +26,12 @@ for a damage-type go [here](https://minecraft.gamepedia.com/Health) and scroll t
 	# ftp://<YOUR FTP SERVER>/<PATH TO FILE ON SERVER>
 	"ftpserver": "ftp://...",
 	"ftplogin": "username",
-	"ftppasswd": "password"
+	"ftppasswd": "password",
+	# If you set this to false, the resource-pack will be managed by Minecraft
+	# instead of Sponge. If Minecraft manages the resource-pack joining the server
+	# might be slightly faster, but you'll have to restart the server after 
+	# updating the resource-pack for Minecraft to correctly distribute it.
+	"forceDownload": "true"
 }
 
 # every sound can require a permission and/or user id

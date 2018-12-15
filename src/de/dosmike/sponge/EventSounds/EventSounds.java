@@ -17,12 +17,20 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 
 import java.util.Optional;
 
-@Plugin(id="eventsounds", name="Event Sounds", version="0.1", authors={"DosMike"})
+@Plugin(id="eventsounds", name="Event Sounds", version="0.2", authors={"DosMike"})
 public class EventSounds {
 
 	private SpongeExecutorService executor;
 	public static SpongeExecutorService getExecutor() {
 		return instance.executor;
+	}
+
+	private static boolean forceDownload = true;
+	public static void setForceDownload(boolean forceDownload) {
+		EventSounds.forceDownload = forceDownload;
+	}
+	public static boolean doForceDownload() {
+		return forceDownload;
 	}
 
 	private static EventSounds instance;

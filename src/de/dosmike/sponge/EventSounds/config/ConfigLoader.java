@@ -1,5 +1,6 @@
 package de.dosmike.sponge.EventSounds.config;
 
+import de.dosmike.sponge.EventSounds.EventSounds;
 import de.dosmike.sponge.EventSounds.events.SoundsCollectedEvent;
 import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -18,17 +19,19 @@ public class ConfigLoader {
     public static ResourcePacker load(ConfigurationLoader<CommentedConfigurationNode> config) throws IOException, ConfigurationException {
 
         EventSoundRegistry.resetAll();
-        ResourcePacker packer = null;
 
         CommentedConfigurationNode root = config.load(ConfigurationOptions.defaults());
+        ResourcePacker packer = null;
         if (!root.getNode("packer").isVirtual()) {
             packer = new ResourcePacker(
                     getOptionalString(root.getNode("packer"), "template").orElse(null),
                     getOptionalString(root.getNode("packer"), "ftpserver").orElse(null),
                     getOptionalString(root.getNode("packer"), "ftplogin").orElse(null),
                     getOptionalString(root.getNode("packer"), "ftppasswd").orElse(null));
+            EventSounds.setForceDownload(
+                    getOptionalString(root.getNode("packer"), "forceDownload").orElse("true").equalsIgnoreCase("true")
+            );
         }
-
         for (String event : EventSoundRegistry.getStandardEvents()) {
             ConfigurationNode cfgEvent = root.getNode(event);
             if (!cfgEvent.isVirtual()) {
@@ -53,6 +56,5 @@ public class ConfigLoader {
         }
         return Optional.of(node.getNode(key).getString());
     }
-
 
 }
