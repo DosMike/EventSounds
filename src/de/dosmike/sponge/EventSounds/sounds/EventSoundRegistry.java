@@ -352,7 +352,7 @@ public class EventSoundRegistry {
             if ("_options".equalsIgnoreCase(key)) {
                 p_options = SoundOptions.parseConfigurationNode(e.getValue());
             } else {
-                EventSounds.l("Parsing group %s %s", event, e.getKey());
+                if (EventSounds.logVerbose()) EventSounds.l("Parsing group %s %s", event, e.getKey());
                 Playable p_playable = Playable.builder().fromConfigurationNode(e.getValue()).build(event, key);
                 BiFitness<Integer, Player, Object> p_predicate = parsePredicate(event, e.getValue());
                 p_sounds.put(p_predicate, p_playable);
@@ -372,7 +372,6 @@ public class EventSoundRegistry {
             if (uuid != null) try {
                 userid = UUID.fromString(uuid);
             } catch (IllegalArgumentException e) {/**/}
-            EventSounds.l("Test join: %s %s", userid, permission);
             if (userid != null && (permission != null && !permission.isEmpty())) {
                 //both set, match value 3
                 final UUID val = userid;

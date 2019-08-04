@@ -12,6 +12,7 @@ import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -20,7 +21,6 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class cmdEventSounds {
@@ -118,6 +118,9 @@ public class cmdEventSounds {
 
 									boolean valid = packer.validateResourcePack();
 									if (valid) {
+										for (Player p : Sponge.getServer().getOnlinePlayers()) {
+											packer.sendDefaultPackUpdated(p);
+										}
 										printUpdate(src, 5, maxStage,
 											Text.of(TextColors.GREEN, "Done! The resource-pack was successfully uploaded.")
 										);
@@ -158,9 +161,13 @@ public class cmdEventSounds {
 					Player player = (Player)src;
 					if (pack.isPresent()) {
 						player.sendMessage(Text.of(TextColors.DARK_GREEN, "Sending the Resource Pack your way..."));
-						EventSounds.getExecutor().schedule(()->
-							player.sendResourcePack(pack.get())
-						, 50, TimeUnit.MILLISECONDS); //wait one tick, so the chat message gets sent first
+						Task.builder().delayTicks(1).execute(()-> {
+							ResourcePacker packer = EventSounds.getResourcePacker().orElse(null);
+							if (packer != null)
+								packer.sendDefaultPackUpdated(player);
+							else
+								player.sendResourcePack(pack.get());
+						}).submit(EventSounds.getInstance()); //wait one tick, so the chat message gets sent first
 					} else {
 						player.sendMessage(Text.of(TextColors.RED, "There is no Resource Pack available"));
 					}

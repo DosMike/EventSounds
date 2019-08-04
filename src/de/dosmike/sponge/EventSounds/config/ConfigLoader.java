@@ -6,6 +6,7 @@ import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -21,6 +22,15 @@ public class ConfigLoader {
         EventSoundRegistry.resetAll();
 
         CommentedConfigurationNode root = config.load(ConfigurationOptions.defaults());
+        if (root.getNode("plugin").isVirtual() && root.getNode("packer").isVirtual()) {
+            EventSounds.w("Trying to write defautls");
+            HoconConfigurationLoader defaultConfig = HoconConfigurationLoader.builder()
+                    .setURL(Sponge.getAssetManager().getAsset(EventSounds.getInstance(), "default.conf").get().getUrl())
+                    .build();
+            root.mergeValuesFrom(defaultConfig.load(ConfigurationOptions.defaults()));
+            config.save(root);
+        }
+        EventSounds.getInstance().verbose = getOptionalBoolean(root.getNode("plugin"), "verbose").orElse(true);
         ResourcePacker packer = null;
         if (!root.getNode("packer").isVirtual()) {
             packer = new ResourcePacker(
@@ -29,7 +39,7 @@ public class ConfigLoader {
                     getOptionalString(root.getNode("packer"), "ftplogin").orElse(null),
                     getOptionalString(root.getNode("packer"), "ftppasswd").orElse(null));
             EventSounds.setForceDownload(
-                    getOptionalString(root.getNode("packer"), "forceDownload").orElse("true").equalsIgnoreCase("true")
+                    getOptionalBoolean(root.getNode("packer"), "forceDownload").orElse(true)
             );
         }
         for (String event : EventSoundRegistry.getStandardEvents()) {
@@ -54,7 +64,12 @@ public class ConfigLoader {
         if (node.getNode(key).isVirtual()) {
             return Optional.empty();
         }
-        return Optional.of(node.getNode(key).getString());
+        return Optional.ofNullable(node.getNode(key).getString());
     }
-
+    private static Optional<Boolean> getOptionalBoolean(ConfigurationNode node, String key) {
+        if (node.getNode(key).isVirtual()) {
+            return Optional.empty();
+        }
+        return Optional.of(node.getNode(key).getBoolean());
+    }
 }

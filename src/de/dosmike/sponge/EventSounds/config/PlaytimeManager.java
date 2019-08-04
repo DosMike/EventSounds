@@ -79,12 +79,13 @@ public class PlaytimeManager {
 //            EventSounds.l("Sound %s is %d ms long", id, timeMs);
             if (timeMs > 0)
                 soundLengths.put(id, timeMs);
-            else
-                EventSounds.w("Could not read length for sound %s", id);
+            else {
+                if (EventSounds.logVerbose()) EventSounds.w("Could not read length for sound %s", id);
+            }
         }
 
         EventSoundRegistry.getSoundDefinitions().forEach(def->{
-            EventSounds.l("File: %s %s", def.isExternal()?"Extern":"Server", String.join(", ", def.getFiles()));
+            if (EventSounds.logVerbose()) EventSounds.l("File: %s %s", def.isExternal()?"Plugin":"Config", String.join(", ", def.getFiles()));
             long timeMs = -1;
             if (!def.isExternal()) {
 
@@ -117,8 +118,9 @@ public class PlaytimeManager {
 
             if (timeMs > 0)
                 soundLengths.put(def.getRegistryName(), timeMs);
-            else
-                EventSounds.w("Could not read length for sound %s", def.getRegistryName());
+            else {
+                if (EventSounds.logVerbose()) EventSounds.w("Could not read length for sound %s", def.getRegistryName());
+            }
         });
     }
 

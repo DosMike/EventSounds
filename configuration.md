@@ -33,7 +33,10 @@ for a damage-type go [here](https://minecraft.gamepedia.com/Health) and scroll t
 	# updating the resource-pack for Minecraft to correctly distribute it.
 	"forceDownload": "true"
 }
-
+"plugin": {
+  # If you change this to false it will reduce the amount of console output
+  "verbose": true
+}
 # every sound can require a permission and/or user id
 # all "_options" support cooldown_global, cooldown_client and delay (seconds)
 "chat": {

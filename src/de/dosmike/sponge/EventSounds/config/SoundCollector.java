@@ -22,9 +22,9 @@ public class SoundCollector {
     /** @return maping of sound names to file list for registration */
     static Map<String, Set<String>> readIndex(PluginContainer plugin) {
         Map<String, Set<String>> entries = new HashMap<>();
-        if (!plugin.getInstance().isPresent())
-            EventSounds.l("Could not read sounds from %s", plugin.getName());
-        else {
+        if (!plugin.getInstance().isPresent()) {
+//            if (EventSounds.logVerbose()) EventSounds.l("Could not read sounds from %s", plugin.getName());
+        } else {
             Optional<Asset> asset = plugin.getAsset( "eventsounds.json");
             if (asset.isPresent()) {
                 try {
@@ -68,7 +68,7 @@ public class SoundCollector {
                     tmp.removeAll(found);
                     EventSounds.w("Missing sounds for %s: %s", id, String.join(", ", tmp));
                 } else {
-                    EventSounds.l(" > %d files for %s", found.size(), squish);
+//                    if (EventSounds.logVerbose()) EventSounds.l(" > %d files for %s", found.size(), squish);
                     externalFiles.put(squish, found);
                     soundNamesForPlugin.add(squish);
                 }
@@ -85,7 +85,7 @@ public class SoundCollector {
         pluginSounds.getOrDefault(plugin.getId(), new HashSet<>())
                 .stream().map(s->{
                     int i = s.lastIndexOf('.');
-                    return new String[]{s.substring(0, i), "es.plugin."+s};
+                    return new String[]{s.substring(i+1), "es.plugin."+s};
                 })
                 .forEach(s->map.put(s[0], SoundType.of(s[1])));
         return map;

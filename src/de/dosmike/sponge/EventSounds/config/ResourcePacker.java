@@ -5,12 +5,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import de.dosmike.sponge.EventSounds.EventSounds;
 import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
+import it.sauronsoftware.ftp4j.*;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.resourcepack.ResourcePacks;
+import org.spongepowered.api.text.Text;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -229,33 +230,31 @@ public class ResourcePacker {
 
         FTPClient client = new FTPClient();
         InputStream zipIn = null;
-        OutputStream out = null;
         try {
             zipIn = new FileInputStream(zipDst);
 
             int port = ftpTarget.getPort();
-            if (port < 0) port = FTP.DEFAULT_PORT;
-            client.connect(ftpTarget.getHost(), port);
-            if (ftpU != null)
-                if (!client.login(ftpU, ftpP))
-                    throw new RuntimeException("Login failed");
+            if (port < 0) //no port specified
+                client.connect(ftpTarget.getHost());
+            else
+                client.connect(ftpTarget.getHost(), port);
+            if (ftpU != null) {
+                try {
+                    client.login(ftpU, ftpP);
+                    client.setAutoNoopTimeout(15000);
+                } catch (FTPException|FTPIllegalReplyException exception) {
+                    throw new RuntimeException("Login failed"); // more readable error for user
+                }
+            }
 
             Path path = Paths.get(ftpTarget.getPath());
             if (path.getFileName() == null || !path.getFileName().toString().endsWith(".zip"))
                 throw new IOException("Please append a zip path to the ftp url");
             EventSounds.l("Remote file: %s",path.toString());
 
-            for (int i = 0; i < path.getNameCount()-1; i++) {
+            for (int i = 0; i < path.getNameCount() - 1; i++) {
                 String elem = path.getName(i).toString();
-                EventSounds.l("FTP> cd %s", elem);
-                if (!client.changeWorkingDirectory(elem)) {
-                    EventSounds.l("FTP> mkdir %s", elem);
-                    if (!client.makeDirectory(elem))
-                        throw new IOException("Couldn't create remote directory!");
-                    EventSounds.l("FTP> cd %s", elem);
-                    if (!client.changeWorkingDirectory(elem))
-                        throw new IOException("Couldn't enter remote directory!");
-                }
+                forceEnterDirectory(client, elem);
             }
             String name = path.getName(path.getNameCount()-1).toString();
             String[] files = client.listNames();
@@ -263,28 +262,26 @@ public class ResourcePacker {
                 throw new IOException("Direction could not be read");
             if (ArrayUtils.contains(files, name)) {
                 EventSounds.l("FTP> rm %s", name);
-                if (!client.deleteFile(name))
+                try {
+                    client.deleteFile(name);
+                } catch (Exception e) {
                     throw new IOException("Could not delete old resource-pack");
+                }
             }
             EventSounds.l("FTP> put %s", name);
-            client.setFileType(FTP.BINARY_FILE_TYPE);
-            if (!client.allocate((int)zipDst.length()))
-                throw new IOException("Resource-Pack too big for Server");
-            out = client.appendFileStream(name);
-
-            while ((r=zipIn.read(buffer))>=0) {
-                out.write(buffer,0,r);
+            client.setType(FTPClient.TYPE_BINARY);
+            try {
+                client.upload(name, zipIn, 0, 0, null);
+            } catch (FTPDataTransferException|FTPAbortedException e) {
+                throw new RuntimeException("Upload failed or was aborted");
             }
-            out.flush();
-            out.close();
 
             client.logout();
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException("FTP connection Failed", e);
         } finally {
-            try { client.disconnect(); } catch (Exception e) {/**/}
+            try { client.disconnect(true); } catch (Exception e) {/**/}
             try { zipIn.close(); } catch (Exception e) {/**/}
-            try { out.close(); } catch (Exception e) {/**/}
         }
     }
 
@@ -296,10 +293,32 @@ public class ResourcePacker {
             if (pack==null)return false;
             //get updated hash
             pack = ResourcePacks.fromUri(pack.getUri());
+            EventSounds.l("Hash A/B: \n%s\n%s", pack.getHash().orElse("NULL"), sha1);
             return sha1.equalsIgnoreCase(pack.getHash().orElse(null));
         } catch (FileNotFoundException e) {
             return false;
         }
     }
 
+    private void forceEnterDirectory(FTPClient client, String directory) throws FTPException, FTPIllegalReplyException, IOException {
+        try {
+            EventSounds.l("FTP> cd %s", directory);
+            client.changeDirectory(directory);
+        } catch (FTPException e) {
+            EventSounds.l("FTP> mkdir %s", directory);
+            client.createDirectory(directory);
+            EventSounds.l("FTP> cd %s", directory);
+            client.changeDirectory(directory);
+        }
+    }
+
+    public void sendDefaultPackUpdated(Player player) {
+        ResourcePack pack = Sponge.getServer().getDefaultResourcePack().orElse(null);
+        if (pack==null) {
+            player.sendMessage(Text.of("Resource pack download was not defined in server.properties"));
+            return;
+        }
+        ResourcePack newPack = ResourcePacks.fromUriUnchecked(pack.getUri());
+        player.sendResourcePack(newPack);
+    }
 }
