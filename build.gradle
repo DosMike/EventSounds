@@ -43,9 +43,9 @@ configurations {
 
 
 dependencies {
-    compile 'org.jetbrains:annotations:16.0.2'
-    compile 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
-    compile 'com.github.asbachb:ftp4j:1.7.3'
+    compileOnly 'org.jetbrains:annotations:16.0.2'
+    compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
+    compileOnly 'com.github.asbachb:ftp4j:1.7.3'
     shadow 'com.github.DosMike:SpongePluginVersionChecker:master-SNAPSHOT'
 }
 
