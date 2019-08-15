@@ -61,3 +61,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 If you set up a ftp connection this plugin will connect to the configured
 ftp server on request (`/es reload -u`)
+
+**[Version Checker](https://github.com/DosMike/SpongePluginVersionChecker)**  
+This plugin uses a version checker to notify you about available updates.  
+This updater is **disabled by default** and can be enabled in `config/eventsounds.conf`.
+by setting the value `plugin.VersionChecker` to `true`.  
+If enabled it will asynchronously check (once per server start) if the Ore repository has any updates.  
+This will *only print update notes into the server log*, no files are being downlaoded!

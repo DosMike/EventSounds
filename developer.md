@@ -1,5 +1,18 @@
 # Developer Stuff
 
+## Adding this plugin as dependency
+
+```{groovy}
+repositories {
+    ...
+    maven { url "https://jitpack.io" }
+}
+dependencies {
+    ...
+    compile 'com.github.DosMike:EventSounds:master-SNAPSHOT'
+}
+```
+
 ## Adding sounds for EventSounds to register
 
 * Create the asset-folder for your plugins (see Sponge docs for that)
