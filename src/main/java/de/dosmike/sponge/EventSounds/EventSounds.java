@@ -18,7 +18,7 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 
 import java.util.Optional;
 
-@Plugin(id="eventsounds", name="Event Sounds", version="0.3.1", authors={"DosMike"})
+@Plugin(id="eventsounds", name="Event Sounds", version="0.3.2", authors={"DosMike"})
 public class EventSounds {
 
 	private SpongeExecutorService executor;

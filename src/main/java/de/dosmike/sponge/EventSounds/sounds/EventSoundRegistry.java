@@ -65,6 +65,10 @@ public class EventSoundRegistry {
     public static Collection<String> getStandardEvents() {
         return Events;
     }
+    /** @return the names of all registered events */
+    public static Collection<String> getAllEvents() {
+        return new HashSet<>(event_sounds.keySet());
+    }
 
     //event -> options
     private static Map<String, SoundOptions> event_options = new HashMap<>();

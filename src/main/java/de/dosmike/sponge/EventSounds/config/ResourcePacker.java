@@ -50,7 +50,7 @@ public class ResourcePacker {
         } else {
             ftpTarget = new URL(ftpUploadTarget);
             if ((ftpPass == null || ftpPass.isEmpty()) && (ftpUser != null && !ftpUser.isEmpty()))
-                throw new RuntimeException("If a ftp password is required if a ftp user was set");
+                throw new RuntimeException("A ftp password is required if a ftp user was set");
             else if (ftpUser != null && !ftpUser.isEmpty()) {
                 ftpU = ftpUser;
                 ftpP = ftpPass;
@@ -248,7 +248,7 @@ public class ResourcePacker {
             }
 
             Path path = Paths.get(ftpTarget.getPath());
-            if (path.getFileName() == null || !path.getFileName().toString().endsWith(".zip"))
+            if (path.getFileName() == null || !path.getFileName().toString().toLowerCase().endsWith(".zip"))
                 throw new IOException("Please append a zip path to the ftp url");
             EventSounds.l("Remote file: %s",path.toString());
 
@@ -259,7 +259,7 @@ public class ResourcePacker {
             String name = path.getName(path.getNameCount()-1).toString();
             String[] files = client.listNames();
             if (files == null)
-                throw new IOException("Direction could not be read");
+                throw new IOException("Directory could not be read");
             if (ArrayUtils.contains(files, name)) {
                 EventSounds.l("FTP> rm %s", name);
                 try {

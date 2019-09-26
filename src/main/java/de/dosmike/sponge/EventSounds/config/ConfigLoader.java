@@ -15,6 +15,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import javax.naming.ConfigurationException;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ConfigLoader {
 
@@ -60,7 +62,10 @@ public class ConfigLoader {
                     getOptionalBoolean(root.getNode("packer"), "forceDownload").orElse(true)
             );
         }
-        for (String event : EventSoundRegistry.getStandardEvents()) {
+        Set<String> allKeys = root.getChildrenMap().keySet().stream().map(Object::toString).collect(Collectors.toSet());
+        allKeys.remove("packer"); //special case: ftp/packer config
+        allKeys.remove("plugin"); //special case: plugin settings
+        for (String event : allKeys) {
             ConfigurationNode cfgEvent = root.getNode(event);
             if (!cfgEvent.isVirtual()) {
                 EventSoundRegistry.parseConfigurationNode(event, cfgEvent);
