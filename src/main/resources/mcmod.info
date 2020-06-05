@@ -1,7 +1,7 @@
 [{
     "modid": "eventsounds",
     "name": "Event Sounds",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "Event Sounds including resource packer",
     "authorList": [
         "DosMike"

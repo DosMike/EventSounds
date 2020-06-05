@@ -276,7 +276,6 @@ public class ResourcePacker {
                 throw new RuntimeException("Upload failed or was aborted");
             }
 
-            client.logout();
         } catch (Exception e) {
             throw new RuntimeException("FTP connection Failed", e);
         } finally {
