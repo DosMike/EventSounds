@@ -17,6 +17,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -42,7 +43,7 @@ public class ResourcePacker {
     private URL ftpTarget;
     private JsonObject jsonSounds;
     public ResourcePacker(String templateArchive, String ftpUploadTarget, String ftpUser, String ftpPass) throws MalformedURLException {
-        if (templateArchive != null)
+        if (templateArchive != null && !templateArchive.trim().isEmpty())
             zipSrc = new File(".", templateArchive);
         else zipSrc = null;
         if (ftpUploadTarget == null || ftpUploadTarget.isEmpty()) {
@@ -69,7 +70,7 @@ public class ResourcePacker {
         if (zipSrc != null && zipSrc.exists()) {
             ZipInputStream zin = new ZipInputStream(new FileInputStream(zipSrc));
             ZipEntry entry;
-            while ((entry = zin.getNextEntry()) != null) {
+            while ((entry = zin.getNextEntry()) != null) { //copy from the template anything that's not sound related
                 Path path = Paths.get(entry.getName());
                 if (path.startsWith(soundsDir) || path.equals(soundsJson)) continue;
 
@@ -83,7 +84,7 @@ public class ResourcePacker {
                 zin.closeEntry();
                 zout.closeEntry();
             }
-        } else {
+        } else { //create at least a pack.mcmeta
             JsonObject packmcmeta = new JsonObject();
 
             JsonObject jpack = new JsonObject();
@@ -93,14 +94,7 @@ public class ResourcePacker {
 
             ZipEntry entry = new ZipEntry("pack.mcmeta");
             zout.putNextEntry(entry);
-            {
-                EventSoundRegistry.getSoundDefinitions().forEach(def -> jsonSounds.add(def.getRegistryName(), def.toJson()));
-                StringWriter sw = new StringWriter(512);
-                JsonWriter writer = new JsonWriter(sw);
-                Gson g = new Gson();
-                g.toJson(jsonSounds, writer);
-                zout.write(sw.toString().getBytes());
-            }
+            zout.write(jpack.toString().getBytes(StandardCharsets.UTF_8));
             zout.closeEntry();
         }
 
@@ -125,7 +119,7 @@ public class ResourcePacker {
                     File toZip = new File("./assets/eventsounds/", file);
 
                     //replace('\', '/'), because minecraft does not seem to use Paths, but split('/')
-                    String zipPath = soundsCustom.resolve(file).toString().replace('\\', '/');
+                    String zipPath = soundsCustom.resolve(file).toString().replace('\\', '/').toLowerCase();
                     EventSounds.l("Zipping %s to %s", toZip.getAbsolutePath(), zipPath);
                     ZipEntry e = new ZipEntry(zipPath);
                     InputStream fin = null;
