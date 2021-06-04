@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import de.dosmike.sponge.EventSounds.config.ConfigLoader;
 import de.dosmike.sponge.EventSounds.config.ResourcePacker;
 import de.dosmike.sponge.EventSounds.config.SoundCollector;
-import de.dosmike.sponge.VersionChecker;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
@@ -62,7 +61,6 @@ public class EventSounds {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		VersionChecker.checkVersion(this);
 		CommandRegistra.RegisterCommands();
 		executor = Sponge.getScheduler().createAsyncExecutor(this);
 		Sponge.getEventManager().registerListeners(this, new EventListeners());

@@ -3,7 +3,6 @@ package de.dosmike.sponge.EventSounds.config;
 import de.dosmike.sponge.EventSounds.EventSounds;
 import de.dosmike.sponge.EventSounds.events.SoundsCollectedEvent;
 import de.dosmike.sponge.EventSounds.sounds.EventSoundRegistry;
-import de.dosmike.sponge.VersionChecker;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -34,22 +33,6 @@ public class ConfigLoader {
             config.save(root);
         }
         EventSounds.getInstance().verbose = getOptionalBoolean(root.getNode("plugin"), "verbose").orElse(true);
-        CommentedConfigurationNode vcnode = root.getNode("plugin").getNode("VersionChecker");
-        if (vcnode.isVirtual()) { //patch value into config if missing
-            vcnode.setValue(false);
-            vcnode.setComment("It's strongly recommended to enable automatic version checking,\n" +
-                    "This will also inform you about changes in dependencies.\n" +
-                    "Set this value to true to allow this Plugin to check for Updates on Ore");
-            config.save(root);
-            VersionChecker.setVersionCheckingEnabled(
-                    Sponge.getPluginManager().fromInstance(EventSounds.getInstance()).get().getId(),
-                    false);
-        } else {
-            VersionChecker.setVersionCheckingEnabled
-                    (Sponge.getPluginManager().fromInstance(EventSounds.getInstance()).get().getId(),
-                    vcnode.getBoolean(false)
-                    );
-        }
 
         ResourcePacker packer = null;
         if (!root.getNode("packer").isVirtual()) {
